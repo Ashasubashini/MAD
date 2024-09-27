@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:week2/Login.dart';  // Import the Login page for navigation
+import 'package:week2/Login.dart';
 
 class SignUpPage extends StatelessWidget {
   const SignUpPage({super.key});
@@ -75,7 +75,6 @@ class SignUpPage extends StatelessWidget {
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () {
-                // Handle sign-up functionality here
               },
               child: const Text('Sign Up'),
               style: ElevatedButton.styleFrom(
@@ -90,7 +89,6 @@ class SignUpPage extends StatelessWidget {
                 const Text('Already registered? '),
                 TextButton(
                   onPressed: () {
-                    // Navigate to the Login page
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => const LoginPage()),

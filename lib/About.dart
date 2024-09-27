@@ -15,12 +15,11 @@ class AboutPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Add the main image at the top of the About page
             Image.asset(
-              'images/AboutUsmain.jpg', // Replace with your actual image path
-              width: double.infinity,  // Make the image take up the full width
-              height: 250,             // You can adjust the height as needed
-              fit: BoxFit.cover,        // Ensure the image covers the available space
+              'images/AboutUsmain.jpg',
+              width: double.infinity,
+              height: 250,
+              fit: BoxFit.cover,
             ),
             const Padding(
               padding: EdgeInsets.all(16.0),

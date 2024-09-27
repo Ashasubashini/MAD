@@ -18,7 +18,7 @@ class InnerPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(name), // Display the product name in the AppBar
+        title: Text(name),
         backgroundColor: const Color(0xFF0B6E4F),
       ),
       body: Padding(
@@ -37,13 +37,12 @@ class InnerPage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              'Price: \$${price.toStringAsFixed(2)}', // Display the price
+              'Price: \$${price.toStringAsFixed(2)}',
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () {
-                // Add to Cart functionality here
               },
               child: const Text('Add to Cart'),
               style: ElevatedButton.styleFrom(

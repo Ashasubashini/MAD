@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:week2/Home.dart';
+import 'package:week2/cart.dart';
+import 'package:week2/profile.dart';
 
 void main() {
   runApp(const MyApp());
@@ -13,12 +15,11 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  bool isDarkMode = false;  // Keep track of whether dark mode is enabled
+  bool isDarkMode = false;
 
-  // Function to toggle the theme mode
   void _toggleTheme() {
     setState(() {
-      isDarkMode = !isDarkMode;  // Switch between light and dark mode
+      isDarkMode = !isDarkMode;
     });
   }
 
@@ -27,12 +28,14 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Queens',
-      theme: ThemeData.light(),  // Light theme
-      darkTheme: ThemeData.dark(),  // Dark theme
-      themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,  // Switch between themes based on isDarkMode
-      initialRoute: '/',  // Initial route set to home page
+      theme: ThemeData.light(),
+      darkTheme: ThemeData.dark(),
+      themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
+      initialRoute: '/',
       routes: {
-        '/': (context) => HomePage(toggleTheme: _toggleTheme, isDarkMode: isDarkMode),  // Pass toggleTheme function to HomePage
+        '/': (context) => HomePage(toggleTheme: _toggleTheme, isDarkMode: isDarkMode),
+        '/buying' : (context) => const Cart(),
+        '/profile' : (context) => const Profile(),
       },
     );
   }

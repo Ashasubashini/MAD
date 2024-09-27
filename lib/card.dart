@@ -42,7 +42,6 @@ class ItemCard extends StatelessWidget {
                   width: double.infinity,
                   child: OutlinedButton(
                     onPressed: () {
-                      // Navigate to the InnerPage when "Discover more" is clicked
                       Navigator.push(
                         context,
                         MaterialPageRoute(
