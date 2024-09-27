@@ -111,7 +111,7 @@ class _ProfileState extends State<Profile> {
             if (index == 0) {
               Navigator.pushNamed(context, '/');  // Navigate to Home Page
             } else if (index == 1) {
-              Navigator.pushNamed(context, '/cart');  // Navigate to Cart Page
+              Navigator.pushNamed(context, '/buying');  // Navigate to Cart Page
             } else if (index == 2) {
               Navigator.pushNamed(context, '/profile');  // Already on Profile Page
             }
@@ -124,7 +124,7 @@ class _ProfileState extends State<Profile> {
           ),
           NavigationDestination(
             icon: Icon(Icons.shopping_cart),
-            label: 'Cart',
+            label: 'Buying',
           ),
           NavigationDestination(
             icon: Icon(Icons.person),
