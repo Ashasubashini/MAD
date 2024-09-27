@@ -48,16 +48,32 @@ class _CartState extends State<Cart> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: GridView.builder(
-          itemCount: products.length,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            mainAxisSpacing: 10,
-            crossAxisSpacing: 10,
-            childAspectRatio: 1,
-          ),
-          itemBuilder: (context, index) {
-            return buildProductCard(products[index]);
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            // Check the width of the screen
+            if (MediaQuery.of(context).size.width < 600) {
+              // Mobile layout: Use a vertical list
+              return ListView.builder(
+                itemCount: products.length,
+                itemBuilder: (context, index) {
+                  return buildProductCard(products[index]);
+                },
+              );
+            } else {
+              // Tablet or larger layout: Use a grid layout
+              return GridView.builder(
+                itemCount: products.length,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2, // Two items per row
+                  mainAxisSpacing: 10,
+                  crossAxisSpacing: 10,
+                  childAspectRatio: 0.75, // Aspect ratio for the cards
+                ),
+                itemBuilder: (context, index) {
+                  return buildProductCard(products[index]);
+                },
+              );
+            }
           },
         ),
       ),
@@ -158,8 +174,7 @@ class _CartState extends State<Cart> {
                   },
                   child: const Text('Buy Now'),
                   style: ElevatedButton.styleFrom(
-
-                    minimumSize: const Size(double.infinity, 40),  // Full-width button
+                    minimumSize: const Size(double.infinity, 40), // Full-width button
                   ),
                 ),
               ],

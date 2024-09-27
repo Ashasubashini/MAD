@@ -12,8 +12,9 @@ class _ProfileState extends State<Profile> {
 
   @override
   Widget build(BuildContext context) {
+    // Get the screen width
     final double screenWidth = MediaQuery.of(context).size.width;
-    final double buttonWidth = screenWidth > 600 ? 250 : double.infinity;
+    final double buttonWidth = screenWidth > 600 ? 250 : double.infinity; // Fixed button width for larger screens
 
     return Scaffold(
       appBar: AppBar(
@@ -73,13 +74,15 @@ class _ProfileState extends State<Profile> {
             ),
             const SizedBox(height: 24),
 
+            // Centering buttons and adjusting size based on screen width
             Center(
               child: ElevatedButton(
                 onPressed: () {
+                  // Edit profile functionality here
                 },
                 child: const Text('Edit Profile'),
                 style: ElevatedButton.styleFrom(
-                  minimumSize: Size(buttonWidth, 50),
+                  minimumSize: Size(buttonWidth, 50), // Responsive button size
                 ),
               ),
             ),
@@ -88,11 +91,11 @@ class _ProfileState extends State<Profile> {
             Center(
               child: ElevatedButton(
                 onPressed: () {
+                  // Log out functionality here
                 },
                 child: const Text('Log Out'),
                 style: ElevatedButton.styleFrom(
-
-                  minimumSize: Size(buttonWidth, 50),
+                  minimumSize: Size(buttonWidth, 50), // Responsive button size
                 ),
               ),
             ),
