@@ -12,12 +12,15 @@ class _ProfileState extends State<Profile> {
 
   @override
   Widget build(BuildContext context) {
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final double buttonWidth = screenWidth > 600 ? 250 : double.infinity;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Profile"),
         backgroundColor: const Color(0xFF0B6E4F),
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -70,24 +73,27 @@ class _ProfileState extends State<Profile> {
             ),
             const SizedBox(height: 24),
 
-            ElevatedButton(
-              onPressed: () {
-              },
-              child: const Text('Edit Profile'),
-              style: ElevatedButton.styleFrom(
-
-                minimumSize: const Size(double.infinity, 50),
+            Center(
+              child: ElevatedButton(
+                onPressed: () {
+                },
+                child: const Text('Edit Profile'),
+                style: ElevatedButton.styleFrom(
+                  minimumSize: Size(buttonWidth, 50),
+                ),
               ),
             ),
             const SizedBox(height: 16),
 
-            ElevatedButton(
-              onPressed: () {
-              },
-              child: const Text('Log Out'),
-              style: ElevatedButton.styleFrom(
+            Center(
+              child: ElevatedButton(
+                onPressed: () {
+                },
+                child: const Text('Log Out'),
+                style: ElevatedButton.styleFrom(
 
-                minimumSize: const Size(double.infinity, 50),
+                  minimumSize: Size(buttonWidth, 50),
+                ),
               ),
             ),
           ],
@@ -100,11 +106,11 @@ class _ProfileState extends State<Profile> {
           setState(() {
             currentIndex = index;
             if (index == 0) {
-              Navigator.pushNamed(context, '/');
+              Navigator.pushNamed(context, '/');  // Navigate to Home Page
             } else if (index == 1) {
-              Navigator.pushNamed(context, '/cart');
+              Navigator.pushNamed(context, '/cart');  // Navigate to Cart Page
             } else if (index == 2) {
-              Navigator.pushNamed(context, '/profile');
+              Navigator.pushNamed(context, '/profile');  // Already on Profile Page
             }
           });
         },
