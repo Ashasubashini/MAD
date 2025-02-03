@@ -34,8 +34,8 @@ class _MyAppState extends State<MyApp> {
       initialRoute: '/',
       routes: {
         '/': (context) => HomePage(toggleTheme: _toggleTheme, isDarkMode: isDarkMode),
-        '/buying' : (context) => const Cart(),
-        '/profile' : (context) => const Profile(),
+        '/buying': (context) => const Cart(),
+        '/profile': (context) => ProfilePage(),
       },
     );
   }

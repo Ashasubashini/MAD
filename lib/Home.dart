@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:week2/Login.dart';
 import 'package:week2/About.dart';
 import 'package:week2/Inner.dart';
+import 'package:week2/branches.dart';
+import 'package:week2/watchmaking.dart';
+import 'package:week2/service.dart';
+import 'package:week2/history.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key, required this.isDarkMode, required this.toggleTheme});
@@ -52,15 +56,39 @@ class _HomePageState extends State<HomePage> {
             ),
             ListTile(
               title: const Text('Branches'),
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const BranchesPage()),
+                );
+              },
             ),
             ListTile(
               title: const Text('Watchmaking'),
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const WatchmakingPage()),
+                );
+              },
+            ),
+            ListTile(
+              title: const Text('History'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const HistoryPage()),
+                );
+              },
             ),
             ListTile(
               title: const Text('Service'),
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ServicesPage()),
+                );
+              },
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),

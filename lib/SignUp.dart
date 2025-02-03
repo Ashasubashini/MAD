@@ -1,8 +1,79 @@
 import 'package:flutter/material.dart';
 import 'package:week2/Login.dart';
+import 'package:week2/services/api_service.dart'; // Ensure correct path to ApiService.dart
 
-class SignUpPage extends StatelessWidget {
+class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
+
+  @override
+  State<SignUpPage> createState() => _SignUpPageState();
+}
+
+class _SignUpPageState extends State<SignUpPage> {
+  final ApiService _apiService = ApiService();
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+  TextEditingController();
+  bool _isLoading = false;
+
+  void _registerUser() async {
+    final name = _nameController.text.trim();
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+    final confirmPassword = _confirmPasswordController.text.trim();
+
+    // Validate required fields
+    if (name.isEmpty || email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('All fields are required')),
+      );
+      return;
+    }
+
+    // Check if passwords match
+    if (password != confirmPassword) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Passwords do not match')),
+      );
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final response = await _apiService.register(
+        name,
+        email,
+        password,
+      );
+
+      if (response['success'] == true) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Registration successful!')),
+        );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginPage()),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(response['message'] ?? 'Registration failed')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,24 +94,14 @@ class SignUpPage extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'First Name',
+                        'Name',
                         style: TextStyle(fontSize: 16),
                       ),
-                      const TextField(
-                        decoration: InputDecoration(
+                      TextField(
+                        controller: _nameController,
+                        decoration: const InputDecoration(
                           border: OutlineInputBorder(),
-                          hintText: 'Enter your first name',
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      const Text(
-                        'Last Name',
-                        style: TextStyle(fontSize: 16),
-                      ),
-                      const TextField(
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(),
-                          hintText: 'Enter your last name',
+                          hintText: 'Enter your name',
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -48,46 +109,52 @@ class SignUpPage extends StatelessWidget {
                         'Email',
                         style: TextStyle(fontSize: 16),
                       ),
-                      const TextField(
+                      TextField(
+                        controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                           border: OutlineInputBorder(),
                           hintText: 'Enter your email',
                         ),
                       ),
                       const SizedBox(height: 16),
                       const Text(
-                        'Address',
+                        'Password',
                         style: TextStyle(fontSize: 16),
                       ),
-                      const TextField(
-                        decoration: InputDecoration(
+                      TextField(
+                        controller: _passwordController,
+                        obscureText: true,
+                        decoration: const InputDecoration(
                           border: OutlineInputBorder(),
-                          hintText: 'Enter your address',
+                          hintText: 'Enter your password',
                         ),
                       ),
                       const SizedBox(height: 16),
                       const Text(
-                        'Contact',
+                        'Confirm Password',
                         style: TextStyle(fontSize: 16),
                       ),
-                      const TextField(
-                        keyboardType: TextInputType.phone,
-                        decoration: InputDecoration(
+                      TextField(
+                        controller: _confirmPasswordController,
+                        obscureText: true,
+                        decoration: const InputDecoration(
                           border: OutlineInputBorder(),
-                          hintText: 'Enter your contact number',
+                          hintText: 'Confirm your password',
                         ),
                       ),
                       const SizedBox(height: 16),
                       const Spacer(),
-
                       Center(
                         child: SizedBox(
                           width: 200,
                           child: ElevatedButton(
-                            onPressed: () {
-                            },
-                            child: const Text('Sign Up'),
+                            onPressed: _isLoading ? null : _registerUser,
+                            child: _isLoading
+                                ? const CircularProgressIndicator(
+                              color: Colors.white,
+                            )
+                                : const Text('Sign Up'),
                             style: ElevatedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(vertical: 12),
                             ),
@@ -95,8 +162,6 @@ class SignUpPage extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 16),
-
-                      // Login Row
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -105,7 +170,8 @@ class SignUpPage extends StatelessWidget {
                             onPressed: () {
                               Navigator.push(
                                 context,
-                                MaterialPageRoute(builder: (context) => const LoginPage()),
+                                MaterialPageRoute(
+                                    builder: (context) => const LoginPage()),
                               );
                             },
                             child: const Text('Login'),

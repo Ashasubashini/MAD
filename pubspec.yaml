@@ -30,7 +30,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
+  http: ^1.1.0
+  flutter_secure_storage: ^9.0.0
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -73,6 +74,20 @@ flutter:
     - images/Item5Home.jpg
     - images/Item6Home.jpg
     - images/profilepic.jpg
+    - images/ogf.jpg
+    - images/havelock.jpeg
+    - images/vivo.png
+    - images/Screenshot 2025-01-19 201846.png
+    - images/Screenshot 2025-01-19 202017.png
+    - images/Watchmaking.jpg
+    - images/watchmakin1.jpg
+    - images/map.jpg
+    - images/old.jpg
+    - images/service.jpg
+    - images/service2.jpg
+    - images/servicemain.jpg
+    - images/History.jpg
+    - images/Screenshot 2025-01-19 233148.png
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
 

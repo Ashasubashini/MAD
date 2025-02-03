@@ -1,8 +1,74 @@
 import 'package:flutter/material.dart';
 import 'package:week2/SignUp.dart';
+import 'package:week2/services/api_service.dart';
+import 'package:week2/home.dart';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
+
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final ApiService _apiService = ApiService();
+  bool _isLoading = false;
+  bool isDarkMode = false;
+
+  void toggleTheme() {
+    setState(() {
+      isDarkMode = !isDarkMode;
+    });
+  }
+
+  void _handleLogin() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill in all fields')),
+      );
+      setState(() {
+        _isLoading = false;
+      });
+      return;
+    }
+
+    try {
+      final response = await _apiService.login(email, password);
+      if (response.containsKey('token')) {
+        // Using pushReplacement to prevent going back to login page
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => HomePage(
+              isDarkMode: isDarkMode,
+              toggleTheme: toggleTheme,
+            ),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(response['message'] ?? 'Login failed')),
+        );
+      }
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: ${error.toString()}')),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,9 +92,10 @@ class LoginPage extends StatelessWidget {
                         'Email',
                         style: TextStyle(fontSize: 16),
                       ),
-                      const TextField(
+                      TextField(
+                        controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                           border: OutlineInputBorder(),
                           hintText: 'Enter your email',
                         ),
@@ -38,27 +105,30 @@ class LoginPage extends StatelessWidget {
                         'Password',
                         style: TextStyle(fontSize: 16),
                       ),
-                      const TextField(
+                      TextField(
+                        controller: _passwordController,
                         obscureText: true,
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                           border: OutlineInputBorder(),
                           hintText: 'Enter your password',
                         ),
                       ),
                       const SizedBox(height: 16),
-
                       const Spacer(),
-
                       Center(
                         child: SizedBox(
                           width: 200,
                           child: ElevatedButton(
-                            onPressed: () {
-                            },
-                            child: const Text('Login'),
+                            onPressed: _isLoading ? null : _handleLogin,
                             style: ElevatedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(vertical: 12),
+                              backgroundColor: const Color(0xFF0B6E4F),
                             ),
+                            child: _isLoading
+                                ? const CircularProgressIndicator(
+                              color: Colors.white,
+                            )
+                                : const Text('Login'),
                           ),
                         ),
                       ),
@@ -69,10 +139,11 @@ class LoginPage extends StatelessWidget {
                           const Text("Don't have an account? "),
                           TextButton(
                             onPressed: () {
-                              // Navigate to the Sign Up page
                               Navigator.push(
                                 context,
-                                MaterialPageRoute(builder: (context) => const SignUpPage()),
+                                MaterialPageRoute(
+                                  builder: (context) => const SignUpPage(),
+                                ),
                               );
                             },
                             child: const Text('Sign Up'),
@@ -88,5 +159,12 @@ class LoginPage extends StatelessWidget {
         },
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 }
