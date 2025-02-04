@@ -6,6 +6,10 @@ import 'package:week2/branches.dart';
 import 'package:week2/watchmaking.dart';
 import 'package:week2/service.dart';
 import 'package:week2/history.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:week2/Products.dart';
+import 'package:week2/network_image_widget.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key, required this.isDarkMode, required this.toggleTheme});
@@ -19,6 +23,24 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int currentIndex = 0;
+  Future<List<Product>>? futureProducts;
+
+  @override
+  void initState() {
+    super.initState();
+    futureProducts = fetchProducts();
+  }
+
+  Future<List<Product>> fetchProducts() async {
+    final response = await http.get(Uri.parse('http://10.0.2.2:8000/api/products')); // Change for real device
+
+    if (response.statusCode == 200) {
+      List<dynamic> body = jsonDecode(response.body);
+      return body.map((dynamic item) => Product.fromJson(item)).toList();
+    } else {
+      throw Exception('Failed to load products');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +64,6 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
       drawer: Drawer(
-        surfaceTintColor: Colors.green,
         child: ListView(
           children: [
             ListTile(
@@ -93,14 +114,12 @@ class _HomePageState extends State<HomePage> {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: TextButton(
-                onPressed: () {
-                  widget.toggleTheme();
-                },
+                onPressed: widget.toggleTheme,
                 child: Row(
                   children: [
-                    widget.isDarkMode ? const Text('Toggle light mode') : const Text('Toggle dark mode'),
-                    const SizedBox(width: 16,),
-                    widget.isDarkMode ? const Icon(Icons.sunny) : const Icon(Icons.nightlight),
+                    Text(widget.isDarkMode ? 'Toggle light mode' : 'Toggle dark mode'),
+                    const SizedBox(width: 16),
+                    Icon(widget.isDarkMode ? Icons.sunny : Icons.nightlight),
                   ],
                 ),
               ),
@@ -108,209 +127,75 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Image(image: AssetImage("images/main.png")),
-            const SizedBox(height: 16),
-            // Using MediaQuery to create a responsive layout
-            LayoutBuilder(
-              builder: (context, constraints) {
-                if (MediaQuery.of(context).size.width < 600) {
-                  // Mobile layout
-                  return Column(
-                    children: [
-                      ItemCard(
-                        name: "Timeless Elegance",
-                        title: "A Classic Companion for Every Occasion",
-                        description: "Indulge in the allure of timelessness with watches made in oystersteel, white gold, and other exquisite materials.",
-                        price: 55000.00,
-                        image: "images/item1Home.jpg",
-                      ),
-                      ItemCard(
-                        name: "Golden Aurora",
-                        title: "Illuminate Your Wrist with Golden Radiance",
-                        description: "The Golden Aurora Watch is a luxurious timepiece crafted with rose gold and adorned with sparkling diamonds.",
-                        price: 76000.00,
-                        image: "images/Item2Home.jpg",
-                      ),
-                      ItemCard(
-                        name: "Luxe Horizon",
-                        title: "Radiate Glamour with Every Tick",
-                        description: "The Luxe Horizon watch is a sleek timepiece featuring a glossy black finish that exudes sophistication.",
-                        price: 80000.00,
-                        image: "images/Item3Home.jpg",
-                      ),
-                      ItemCard(
-                        name: "Serenity Sky",
-                        title: "Embrace Tranquility in Style",
-                        description: "The Serenity Sky watch is a regal timepiece designed in a royal golden hue with hints of brown.",
-                        price: 66000.00,
-                        image: "images/Item5Home.jpg",
-                      ),
-                      ItemCard(
-                        name: "Midnight Majesty",
-                        title: "Unveil the Majesty of Midnight",
-                        description: "Midnight Majesty watch shines in a beautiful black color, displaying both date and month.",
-                        price: 95000.00,
-                        image: "images/Item6Home.jpg",
-                      ),
-                    ],
-                  );
+      body: Column(
+        children: [
+          // Main Image
+          Image.asset(
+            'images/main.png',
+            width: double.infinity,
+            height: 200,
+            fit: BoxFit.cover,
+          ),
+          Expanded(
+            child: FutureBuilder<List<Product>>(
+              future: futureProducts,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Center(child: Text('No products available'));
                 } else {
-                  // Tablet or larger layout
-                  return Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Expanded(
-                        child: ItemCard(
-                          name: "Timeless Elegance",
-                          title: "A Classic Companion for Every Occasion",
-                          description: "Indulge in the allure of timelessness with watches made in oystersteel, white gold, and other exquisite materials.",
-                          price: 55000.00,
-                          image: "images/item1Home.jpg",
+                  List<Product> products = snapshot.data!;
+                  return ListView.builder(
+                    itemCount: products.length,
+                    itemBuilder: (context, index) {
+                      Product product = products[index];
+
+                      return Card(
+                        margin: const EdgeInsets.all(10),
+                        elevation: 3,
+                        child: ListTile(
+                          contentPadding: const EdgeInsets.all(10),
+                          title: Text(product.name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                          subtitle: Text('Price: \$${product.price.toStringAsFixed(2)} - Quantity: ${product.quantity}'),
+                          leading: NetworkImageWidget(imageUrl: product.image, width: 50, height: 50),
+                          onTap: () {
+                            // Navigate to product details page
+                          },
                         ),
-                      ),
-                      Expanded(
-                        child: ItemCard(
-                          name: "Golden Aurora",
-                          title: "Illuminate Your Wrist with Golden Radiance",
-                          description: "The Golden Aurora Watch is a luxurious timepiece crafted with rose gold and adorned with sparkling diamonds.",
-                          price: 76000.00,
-                          image: "images/Item2Home.jpg",
-                        ),
-                      ),
-                      Expanded(
-                        child: ItemCard(
-                          name: "Luxe Horizon",
-                          title: "Radiate Glamour with Every Tick",
-                          description: "The Luxe Horizon watch is a sleek timepiece featuring a glossy black finish that exudes sophistication.",
-                          price: 80000.00,
-                          image: "images/Item3Home.jpg",
-                        ),
-                      ),
-                      Expanded(
-                        child: ItemCard(
-                          name: "Serenity Sky",
-                          title: "Embrace Tranquility in Style",
-                          description: "The Serenity Sky watch is a regal timepiece designed in a royal golden hue with hints of brown.",
-                          price: 66000.00,
-                          image: "images/Item5Home.jpg",
-                        ),
-                      ),
-                      Expanded(
-                        child: ItemCard(
-                          name: "Midnight Majesty",
-                          title: "Unveil the Majesty of Midnight",
-                          description: "Midnight Majesty watch shines in a beautiful black color, displaying both date and month.",
-                          price: 95000.00,
-                          image: "images/Item6Home.jpg",
-                        ),
-                      ),
-                    ],
+                      );
+                    },
                   );
                 }
               },
             ),
-          ],
-        ),
+          ),
+        ],
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: currentIndex,
         onDestinationSelected: (int index) {
           setState(() {
             currentIndex = index;
-            if (index == 0) {
-              Navigator.pushNamed(context, '/');
-            }
-            if (index == 1) {
-              Navigator.pushNamed(context, '/buying');
-            }
-            if (index == 2) {
-              Navigator.pushNamed(context, '/profile');
+            switch (index) {
+              case 0:
+                Navigator.pushNamed(context, '/');
+                break;
+              case 1:
+                Navigator.pushNamed(context, '/buying');
+                break;
+              case 2:
+                Navigator.pushNamed(context, '/profile');
+                break;
             }
           });
         },
         destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.shopping_cart),
-            label: 'Buying',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class ItemCard extends StatelessWidget {
-  final String name;
-  final String title;
-  final String description;
-  final double price;
-  final String image;
-
-  const ItemCard({
-    super.key,
-    required this.name,
-    required this.title,
-    required this.description,
-    required this.price,
-    required this.image,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      clipBehavior: Clip.hardEdge,
-      margin: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        borderRadius: const BorderRadius.all(Radius.circular(16)),
-        border: Border.all(color: Colors.black12),
-      ),
-      width: double.infinity,
-      child: Column(
-        children: [
-          Image(image: AssetImage(image)),
-          Container(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(name, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                Text(title, style: const TextStyle(fontSize: 18, color: Colors.grey)),
-                const SizedBox(height: 10),
-                Center(
-                  child: SizedBox(
-                    width: 150,  // Fixed width for the Discover More button
-                    child: OutlinedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => InnerPage(
-                              name: name,
-                              title: title,
-                              description: description,
-                              price: price,
-                            ),
-                          ),
-                        );
-                      },
-                      child: const Text("Discover more"),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+          NavigationDestination(icon: Icon(Icons.home), label: 'Home'),
+          NavigationDestination(icon: Icon(Icons.shopping_cart), label: 'Buying'),
+          NavigationDestination(icon: Icon(Icons.person), label: 'Profile'),
         ],
       ),
     );

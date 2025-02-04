@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:week2/services/api_service.dart';
 import 'package:week2/adminDashboard.dart';
 import 'package:week2/userDashboard.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -12,6 +13,7 @@ class _ProfilePageState extends State<ProfilePage> {
   late Future<Map<String, dynamic>> _userProfile;
   bool _isLoading = true;
   String? _role;
+  final FlutterSecureStorage storage = const FlutterSecureStorage();
 
   @override
   void initState() {
@@ -35,12 +37,35 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
+  // Handle logout
+  void _handleLogout(BuildContext context) async {
+    try {
+      await ApiService().logout(); // Logout user and delete token
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Logged out successfully')),
+      );
+      Navigator.pushReplacementNamed(context, '/login'); // Redirect to login
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Logout failed: $error')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Profile")),
+      appBar: AppBar(
+        title: const Text("Profile"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () => _handleLogout(context), // Logout on button press
+          ),
+        ],
+      ),
       body: _isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : FutureBuilder<Map<String, dynamic>>(
         future: _userProfile,
         builder: (context, snapshot) {
@@ -57,33 +82,33 @@ class _ProfilePageState extends State<ProfilePage> {
                   // Name
                   Text(
                     'Name: ${profile['name']}',
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
                       color: Colors.black87,
                     ),
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
 
                   // Email
                   Text(
                     'Email: ${profile['email']}',
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 18,
                       color: Colors.black54,
                     ),
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
 
                   // Role
                   Text(
                     'Role: ${profile['role']}',
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 18,
                       color: Colors.black54,
                     ),
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
 
                   // Conditional widget based on role
                   _role == 'admin'
@@ -93,7 +118,7 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
             );
           } else {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           }
         },
       ),

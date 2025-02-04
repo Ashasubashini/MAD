@@ -18,7 +18,17 @@ class ApiService {
       }),
     );
 
-    return _handleResponse(response);
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      String token = data['token'];
+
+      // Store token securely
+      await _saveToken(token);
+
+      return data;
+    } else {
+      return _handleResponse(response);
+    }
   }
 
   // Login User
@@ -33,13 +43,20 @@ class ApiService {
     );
 
     if (response.statusCode == 200) {
-      // Save token in secure storage
       final data = json.decode(response.body);
-      await storage.write(key: 'token', value: data['token']);
+      String token = data['token'];
+
+      // ✅ Save token in storage
+      await storage.write(key: 'token', value: token);
+
       return data;
     } else {
       return _handleResponse(response);
     }
+  }
+  void checkStoredToken() async {
+    String? token = await storage.read(key: 'token');
+    print("🔍 Stored Token: $token");
   }
 
   // Logout User
@@ -65,6 +82,12 @@ class ApiService {
     }
   }
 
+  // Check if user is logged in
+  Future<bool> isUserLoggedIn() async {
+    String? token = await _getToken();
+    return token != null;
+  }
+
   // Get authenticated data with token
   Future<Map<String, dynamic>> getUserProfile() async {
     final token = await _getToken();
@@ -74,7 +97,7 @@ class ApiService {
     }
 
     final response = await http.get(
-      Uri.parse('$baseUrl/user'), // Use the correct endpoint for user profile
+      Uri.parse('$baseUrl/user'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -84,30 +107,12 @@ class ApiService {
     return _handleResponse(response);
   }
 
-  // Generate API Token (optional use case for user-generated tokens)
-  Future<Map<String, dynamic>> generateApiToken(String name, List<String> permissions) async {
-    final token = await _getToken();
-
-    if (token == null) {
-      throw Exception('No token found');
-    }
-
-    final response = await http.post(
-      Uri.parse('$baseUrl/api-tokens'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-      body: json.encode({
-        'name': name,
-        'permissions': permissions,
-      }),
-    );
-
-    return _handleResponse(response);
+  // Helper: Save token securely in storage
+  Future<void> _saveToken(String token) async {
+    await storage.write(key: 'token', value: token);
   }
 
-  // Helper: Get token from secure storage
+  // Helper: Retrieve token from storage
   Future<String?> _getToken() async {
     return await storage.read(key: 'token');
   }

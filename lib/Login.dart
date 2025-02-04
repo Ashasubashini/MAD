@@ -44,7 +44,20 @@ class _LoginPageState extends State<LoginPage> {
     try {
       final response = await _apiService.login(email, password);
       if (response.containsKey('token')) {
-        // Using pushReplacement to prevent going back to login page
+        String token = response['token'];
+
+        // Print the token to console (for debugging)
+        print("Login successful! Token: $token");
+
+        // Check if the token is stored securely
+        _apiService.checkStoredToken();
+
+        // Show the token in a Snackbar
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Token: $token')),
+        );
+
+        // Navigate to HomePage
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -69,6 +82,8 @@ class _LoginPageState extends State<LoginPage> {
       });
     }
   }
+
+
 
   @override
   Widget build(BuildContext context) {
