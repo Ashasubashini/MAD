@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:week2/Home.dart';
 import 'package:week2/cart.dart';
 import 'package:week2/profile.dart';
-import 'package:week2/Products.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 void main() {
   runApp(const MyApp());
@@ -35,7 +35,7 @@ class _MyAppState extends State<MyApp> {
       initialRoute: '/',
       routes: {
         '/': (context) => HomePage(toggleTheme: _toggleTheme, isDarkMode: isDarkMode),
-        '/buying': (context) => const Cart(),
+        '/buying': (context) => CartPage(),  // Fixed the class name
         '/profile': (context) => ProfilePage(),
       },
     );

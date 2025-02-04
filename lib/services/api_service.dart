@@ -54,6 +54,7 @@ class ApiService {
       return _handleResponse(response);
     }
   }
+
   void checkStoredToken() async {
     String? token = await storage.read(key: 'token');
     print("🔍 Stored Token: $token");
@@ -127,4 +128,41 @@ class ApiService {
       throw Exception(data['message'] ?? 'An error occurred');
     }
   }
+  Future<Map<String, dynamic>?> addToCart(int productId, int quantity) async {
+    try {
+      final token = await _getToken();
+
+      if (token == null) {
+        throw Exception('No token found');
+      }
+
+      // Prepare headers with the authorization token
+      Map<String, String> headers = {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      };
+
+      // Send a POST request to add the product to the cart
+      final response = await http.post(
+        Uri.parse('$baseUrl/cart/add'), // Ensure this matches the API endpoint
+        headers: headers,
+        body: json.encode({
+          'product_id': productId,
+          'quantity': quantity,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        // If the request is successful, parse the JSON response
+        Map<String, dynamic> data = json.decode(response.body);
+        return data; // Return the response data
+      } else {
+        throw Exception('Failed to add product to cart');
+      }
+    } catch (e) {
+      print('Error: $e');
+      return null;
+    }
+  }
 }
+

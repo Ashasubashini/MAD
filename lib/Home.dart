@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:week2/Login.dart';
 import 'package:week2/About.dart';
-import 'package:week2/Inner.dart';
 import 'package:week2/branches.dart';
 import 'package:week2/watchmaking.dart';
 import 'package:week2/service.dart';
@@ -10,6 +9,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:week2/Products.dart';
 import 'package:week2/network_image_widget.dart';
+import 'package:week2/Inner.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key, required this.isDarkMode, required this.toggleTheme});
@@ -32,7 +32,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<List<Product>> fetchProducts() async {
-    final response = await http.get(Uri.parse('http://10.0.2.2:8000/api/products')); // Change for real device
+    final response = await http.get(Uri.parse('http://10.0.2.2:8000/api/products'));
 
     if (response.statusCode == 200) {
       List<dynamic> body = jsonDecode(response.body);
@@ -47,20 +47,15 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Image.asset(
-          'images/logo2.png',
-          height: 40,
-        ),
+        title: Image.asset('images/logo2.png', height: 40),
         backgroundColor: const Color(0xFF0B6E4F),
         actions: [
           IconButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const LoginPage()),
-                );
-              },
-              icon: const Icon(Icons.person))
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginPage()));
+            },
+            icon: const Icon(Icons.person),
+          ),
         ],
       ),
       drawer: Drawer(
@@ -69,46 +64,31 @@ class _HomePageState extends State<HomePage> {
             ListTile(
               title: const Text('About Us'),
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const AboutPage()),
-                );
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const AboutPage()));
               },
             ),
             ListTile(
               title: const Text('Branches'),
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const BranchesPage()),
-                );
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const BranchesPage()));
               },
             ),
             ListTile(
               title: const Text('Watchmaking'),
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const WatchmakingPage()),
-                );
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const WatchmakingPage()));
               },
             ),
             ListTile(
               title: const Text('History'),
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const HistoryPage()),
-                );
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const HistoryPage()));
               },
             ),
             ListTile(
               title: const Text('Service'),
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const ServicesPage()),
-                );
+                Navigator.push(context, MaterialPageRoute(builder: (context) => const ServicesPage()));
               },
             ),
             Padding(
@@ -129,13 +109,7 @@ class _HomePageState extends State<HomePage> {
       ),
       body: Column(
         children: [
-          // Main Image
-          Image.asset(
-            'images/main.png',
-            width: double.infinity,
-            height: 200,
-            fit: BoxFit.cover,
-          ),
+          Image.asset('images/main.png', width: double.infinity, height: 200, fit: BoxFit.cover),
           Expanded(
             child: FutureBuilder<List<Product>>(
               future: futureProducts,
@@ -156,14 +130,43 @@ class _HomePageState extends State<HomePage> {
                       return Card(
                         margin: const EdgeInsets.all(10),
                         elevation: 3,
-                        child: ListTile(
-                          contentPadding: const EdgeInsets.all(10),
-                          title: Text(product.name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                          subtitle: Text('Price: \$${product.price.toStringAsFixed(2)} - Quantity: ${product.quantity}'),
-                          leading: NetworkImageWidget(imageUrl: product.image, width: 50, height: 50),
-                          onTap: () {
-                            // Navigate to product details page
-                          },
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        child: Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: NetworkImageWidget(imageUrl: product.image, width: double.infinity, height: 150),
+                              ),
+                              const SizedBox(height: 10),
+                              Text(
+                                product.name,
+                                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(height: 5),
+                              Text(
+                                product.smallDescription.length > 60
+                                    ? '${product.smallDescription.substring(0, 60)}...' // Shortened small_description
+                                    : product.smallDescription,
+                                style: const TextStyle(fontSize: 14, color: Colors.grey),
+                              ),
+                              const SizedBox(height: 10),
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (context) => ProductDetailPage(product: product)),
+                                    );
+                                  },
+                                  child: const Text('Discover More'),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       );
                     },

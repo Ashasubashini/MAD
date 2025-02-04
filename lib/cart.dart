@@ -1,170 +1,129 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:week2/Buying.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:http/http.dart' as http;
+import 'package:week2/network_image_widget.dart';
 
-class Cart extends StatefulWidget {
-  const Cart({super.key});
+const String baseUrl = 'http://10.0.2.2:8000/api/cart';
 
+class CartPage extends StatefulWidget {
   @override
-  State<Cart> createState() => _CartState();
+  _CartPageState createState() => _CartPageState();
 }
 
-class _CartState extends State<Cart> {
-  int currentIndex = 1;
+class _CartPageState extends State<CartPage> {
+  final storage = FlutterSecureStorage();
+  List<dynamic> cartItems = [];
+  bool isLoading = true;
+  String? token;
 
-  final List<Map<String, String>> products = [
-    {
-      'image': 'images/item1Home.jpg',
-      'name': 'Timeless Elegance',
-      'price': '\$55000',
-    },
-    {
-      'image': 'images/Item2Home.jpg',
-      'name': 'Golden Aurora',
-      'price': '\$76000',
-    },
-    {
-      'image': 'images/Item3Home.jpg',
-      'name': 'Luxe Horizon',
-      'price': '\$80000',
-    },
-    {
-      'image': 'images/Item5Home.jpg',
-      'name': 'Serenity Sky',
-      'price': '\$66000',
-    },
-    {
-      'image': 'images/Item6Home.jpg',
-      'name': 'Midnight Majesty',
-      'price': '\$95000',
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _loadToken();
+  }
+
+  Future<void> _loadToken() async {
+    token = await storage.read(key: 'token');
+    if (token == null) {
+      setState(() => isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('You must be logged in to view your cart')),
+      );
+      return;
+    }
+    fetchCartItems();
+  }
+
+  Future<void> fetchCartItems() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl'),
+        headers: {'Authorization': 'Bearer $token'},
+      );
+
+      print('Response Status: ${response.statusCode}');
+      print('Response Body: ${response.body}');  // <-- Debugging line
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        setState(() {
+          cartItems = data['cart_items'] ?? [];
+          isLoading = false;
+        });
+      } else {
+        print('Error: ${response.reasonPhrase}');
+        setState(() => isLoading = false);
+      }
+    } catch (e) {
+      print('Exception: $e');
+      setState(() => isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Buying"),
-        backgroundColor: const Color(0xFF0B6E4F),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: GridView.builder(
-          itemCount: products.length,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2, // Two items per row
-            mainAxisSpacing: 10,
-            crossAxisSpacing: 10,
-            childAspectRatio: 0.75, // Aspect ratio for the cards
-          ),
-          itemBuilder: (context, index) {
-            return buildProductCard(products[index]);
-          },
-        ),
-      ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: currentIndex,
-        onDestinationSelected: (int index) {
-          setState(() {
-            currentIndex = index;
-            if (index == 0) {
-              Navigator.pushNamed(context, '/');
-            }
-            if (index == 1) {
-              Navigator.pushNamed(context, '/buying');
-            }
-            if (index == 2) {
-              Navigator.pushNamed(context, '/profile');
-            }
-          });
-        },
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.shopping_cart),
-            label: 'Buying',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
-      ),
-    );
-  }
+      appBar: AppBar(title: Text('Your Cart')),
+      body: isLoading
+          ? Center(child: CircularProgressIndicator())
+          : cartItems.isEmpty
+          ? Center(child: Text('Your cart is empty'))
+          : ListView.builder(
+        itemCount: cartItems.length,
+        itemBuilder: (context, index) {
+          var item = cartItems[index];
+          var product = item['product'] ?? {};
+          var imageUrl = 'http://10.0.2.2:8000/storage/' + (product['image'] ?? ''); // Add the full URL to image
 
-  Widget buildProductCard(Map<String, String> product) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 6,
-            offset: const Offset(2, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: ClipRRect(
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(16),
-                topRight: Radius.circular(16),
-              ),
-              child: Image.asset(
-                product['image']!,
-                fit: BoxFit.cover,
-                width: double.infinity,
-              ),
+          return Card(
+            elevation: 5,  // Add shadow to make the card pop
+            margin: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12), // Rounded corners for the card
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  product['name']!,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
-                Text(
-                  product['price']!,
-                  style: const TextStyle(
-                    color: Colors.grey,
-                    fontSize: 14,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => BuyProductPage(
-                          productName: product['name']!,
-                          productPrice: product['price']!,
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Row(
+                children: [
+                  NetworkImageWidget(imageUrl: imageUrl),  // Custom image widget
+                  SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          product['name'] ?? 'Unknown Product',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                    );
-                  },
-                  child: const Text('Buy Now'),
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: const Size(double.infinity, 40), // Full-width button
+                        SizedBox(height: 8),
+                        Text(
+                          product['small_description'] ?? '',
+                          style: TextStyle(color: Colors.grey[600]),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          'Quantity: ${item['quantity'] ?? 1}',
+                          style: TextStyle(fontWeight: FontWeight.w500),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                  Icon(
+                    Icons.delete,
+                    color: Colors.red,
+                    size: 28,
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
