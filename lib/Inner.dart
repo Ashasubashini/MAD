@@ -3,7 +3,9 @@ import 'package:week2/Products.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+
 import 'package:week2/cart.dart';
+import 'package:week2/services/stripe_service.dart';
 
 class ProductDetailPage extends StatefulWidget {
   final Product product;
@@ -61,6 +63,40 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to add to cart')),
+      );
+    }
+  }
+
+  Future<void> buyNow() async {
+    final token = await storage.read(key: 'token');
+    if (token == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('You must be logged in to buy now')),
+      );
+      return;
+    }
+
+    final url = Uri.parse('http://10.0.2.2:8000/api/checkout'); // Your API endpoint for checkout
+    final response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({
+        'product_id': widget.product.id,
+        'quantity': quantity,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Proceeding to Checkout...')),
+      );
+      // Navigate to checkout page or show the payment interface as needed
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to initiate checkout')),
       );
     }
   }
@@ -140,11 +176,24 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
               ],
             ),
             const SizedBox(height: 20),
-            Center(
-              child: ElevatedButton(
-                onPressed: addToCart,
-                child: const Text("Add to Cart"),
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  onPressed: addToCart,
+                  child: const Text("Add to Cart"),
+                ),
+                const SizedBox(width: 10),
+                ElevatedButton(
+                  onPressed: () {
+                    StripeService.instance.makePayment();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green, // Use backgroundColor instead of primary
+                  ),
+                  child: const Text("Buy Now"),
+                )
+              ],
             ),
           ],
         ),

@@ -12,10 +12,15 @@ class UserDashboard extends StatelessWidget {
         Text('Welcome ${profile['name']}'),
         ElevatedButton(
           onPressed: () {
-            // Add user-specific functionality here
-            print('User dashboard functionality');
+            Navigator.pushNamed(context, '/battery');
           },
-          child: Text('View Orders'),
+          child: Text("Check Battery Status"),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            Navigator.pushNamed(context, '/camera');
+          },
+          child: Text("Camera sensor"),
         ),
         // Add more user-specific features as needed
       ],

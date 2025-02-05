@@ -1,11 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:week2/Home.dart';
+import 'package:week2/battery_screen.dart';
+import 'package:week2/camera_screen.dart';
 import 'package:week2/cart.dart';
+import 'package:week2/const.dart';
 import 'package:week2/profile.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 
-void main() {
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await setup();
   runApp(const MyApp());
+}
+
+Future<void> setup() async {
+  Stripe.publishableKey = stripePublishableKey;
+
+  // Initialize secure storage (if needed)
+  const FlutterSecureStorage storage = FlutterSecureStorage();
+  await storage.containsKey(key: 'userToken');
 }
 
 class MyApp extends StatefulWidget {
@@ -34,9 +49,13 @@ class _MyAppState extends State<MyApp> {
       themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
       initialRoute: '/',
       routes: {
-        '/': (context) => HomePage(toggleTheme: _toggleTheme, isDarkMode: isDarkMode),
-        '/buying': (context) => CartPage(),  // Fixed the class name
+        '/': (context) =>
+            HomePage(toggleTheme: _toggleTheme, isDarkMode: isDarkMode),
+        '/buying': (context) => CartPage(),
         '/profile': (context) => ProfilePage(),
+        '/battery': (context) => BatteryScreen(), // Battery status page
+        '/camera': (context) => CameraScreen(),
+// Added Camera Screen route
       },
     );
   }

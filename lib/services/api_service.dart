@@ -164,5 +164,36 @@ class ApiService {
       return null;
     }
   }
+  Future<String?> createCheckoutSession(int productId, int quantity) async {
+    try {
+      final token = await _getToken();
+
+      if (token == null) {
+        throw Exception('No token found');
+      }
+
+      final response = await http.post(
+        Uri.parse('$baseUrl/stripe/checkout'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          'product_id': productId,
+          'quantity': quantity,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return data['checkout_url'];
+      } else {
+        throw Exception('Failed to create checkout session');
+      }
+    } catch (e) {
+      print('Error creating checkout session: $e');
+      return null;
+    }
+  }
 }
 

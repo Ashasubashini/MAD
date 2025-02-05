@@ -82,31 +82,24 @@ class _ProfilePageState extends State<ProfilePage> {
                   // Name
                   Text(
                     'Name: ${profile['name']}',
-                    style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleLarge
+                        ?.copyWith(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 10),
 
                   // Email
                   Text(
                     'Email: ${profile['email']}',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      color: Colors.black54,
-                    ),
+                    style: Theme.of(context).textTheme.bodyLarge,
                   ),
                   const SizedBox(height: 10),
 
                   // Role
                   Text(
                     'Role: ${profile['role']}',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      color: Colors.black54,
-                    ),
+                    style: Theme.of(context).textTheme.bodyLarge,
                   ),
                   const SizedBox(height: 20),
 
